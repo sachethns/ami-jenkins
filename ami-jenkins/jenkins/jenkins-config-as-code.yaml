@@ -1,0 +1,55 @@
+# Jenkins Configuration as Code
+# This configuration automates the setup of Jenkins, ensuring consistent settings across different environments.
+
+jenkins:
+  # The system message to be displayed on the Jenkins dashboard. This is useful for providing status or environment-specific information to users.
+  systemMessage: "Automating Jenkins Setup using Jenkins Configuration as Code"
+  numExecutors: 2
+
+  # Configuration for Jenkins remoting security. When enabled, it helps secure Jenkins' agent-to-master operations.
+#  remotingSecurity:
+#    enabled: true  # Ensures that remoting security is enforced, which is crucial for avoiding unauthorized command execution.
+
+  # Configuration for the security realm. This section defines how Jenkins handles authentication.
+  securityRealm:
+    local:
+      allowsSignup: false  # Disables new user signups from the Jenkins login screen, which is important for managing users strictly via configuration.
+      users:
+        # Creation of an admin user. This user will have access to configure Jenkins.
+        - id: "ADMIN_USER"  # Placeholder to be replaced with GitHub secrets via GitHub Actions workflow
+          password: "ADMIN_PASSWORD"  # Placeholder to be replaced with GitHub secrets via GitHub Actions workflow
+
+  # Defines the authorization strategy and specifies permissions for various security roles.
+#  authorizationStrategy:
+#    globalMatrix:
+#      permissions:
+#        - "Overall/Administer:authenticated"
+        # Grants all authenticated users full administrative access to Jenkins.
+#        - "Overall/Read:anonymous"
+        # Allows anonymous users to view pages in Jenkins, useful for public-facing Jenkins instances.
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - usernamepassword:
+              scope: GLOBAL
+              id: "github-pat"
+              username: "G_USERNAME" #Placeholder
+              password: "G_PAT" # Placeholder
+              description: "GitHub Personal Access Token"
+          - usernamepassword:
+              scope: GLOBAL
+              id: "docker-cred"
+              username: "DOCKER_USERNAME" # Placeholder
+              password: "DOCKER_PASSWORD" # Placeholder
+              description: "Docker Credentials"
+
+jobs:
+  - file: /var/lib/jenkins/build-and-push-static-site.groovy
+  - file: /var/lib/jenkins/conventional-commit.groovy
+  - file: /var/lib/jenkins/helm-webapp-cve-consumer.groovy
+  - file: /var/lib/jenkins/helm-webapp-cve-processor.groovy
+  - file: /var/lib/jenkins/helm-eks-autoscaler.groovy
+  - file: /var/lib/jenkins/webapp-cve-consumer.groovy
+  - file: /var/lib/jenkins/webapp-cve-processor.groovy
